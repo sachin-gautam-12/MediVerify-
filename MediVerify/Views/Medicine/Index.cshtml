@@ -1,24 +1,78 @@
 @model IEnumerable<Medicine>
 @{
     ViewData["Title"] = "Medicines";
+    var list = Model?.ToList() ?? new List<Medicine>();
+    int page = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int total = ViewBag.Total ?? list.Count;
+    string q = ViewBag.Query as string ?? "";
 }
-<h2>Medicines</h2>
-<p><a class="btn btn-primary" href="/Medicine/Create">Create New</a></p>
-<table class="table table-striped">
-    <thead><tr><th>Name</th><th>Generic</th><th>Manufacturer</th><th>Active</th><th></th></tr></thead>
-    <tbody>
-    @foreach (var m in Model)
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Medicines</h1>
+        <p class="text-muted mb-0">@total medicine(s) in the catalogue.</p>
+    </div>
+    <a class="btn btn-primary" href="/Medicine/Create"><i class="bi bi-plus-lg me-1"></i>Add medicine</a>
+</div>
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="d-flex gap-2">
+            <input class="form-control form-control-sm" style="max-width:320px" name="q" value="@q" placeholder="Search name, generic, manufacturer…" />
+            <button class="btn btn-sm btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+            @if (!string.IsNullOrWhiteSpace(q))
+            {
+                <a class="btn btn-sm btn-outline-secondary" href="/Medicine">Clear</a>
+            }
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Name</th><th>Generic</th><th>Manufacturer</th><th>Category</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @if (!list.Any())
+            {
+                <tr><td colspan="6"><div class="empty-state"><i class="bi bi-capsule"></i>No medicines found.</div></td></tr>
+            }
+            @foreach (var m in list)
+            {
+                <tr>
+                    <td class="fw-semibold">@m.MedicineName</td>
+                    <td>@m.GenericName</td>
+                    <td>@m.Manufacturer</td>
+                    <td>@m.Category</td>
+                    <td>
+                        @if (m.IsActive)
+                        {
+                            <span class="badge-status badge-ok">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge-status badge-cancelled">Inactive</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" href="/Medicine/Details/@m.MedicineId"><i class="bi bi-eye"></i></a>
+                        <a class="btn btn-sm btn-outline-primary" href="/Medicine/Edit/@m.MedicineId"><i class="bi bi-pencil"></i></a>
+                        <form asp-action="ToggleActive" asp-route-id="@m.MedicineId" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm @(m.IsActive ? "btn-outline-danger" : "btn-outline-success")" type="submit" title="@(m.IsActive ? "Deactivate" : "Activate")">
+                                <i class="bi @(m.IsActive ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (totalPages > 1)
     {
-        <tr>
-            <td>@m.MedicineName</td>
-            <td>@m.GenericName</td>
-            <td>@m.Manufacturer</td>
-            <td>@m.IsActive</td>
-            <td>
-                <a href="/Medicine/Details/@m.MedicineId">Details</a> |
-                <a href="/Medicine/Edit/@m.MedicineId">Edit</a>
-            </td>
-        </tr>
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <span class="text-muted small">Page @(page) of @totalPages</span>
+            <div>
+                <a class="btn btn-sm btn-outline-secondary @(page <= 1 ? "disabled" : "")" href="/Medicine?q=@q&page=@(page - 1)&pageSize=@ViewBag.PageSize">Prev</a>
+                <a class="btn btn-sm btn-outline-secondary @(page >= totalPages ? "disabled" : "")" href="/Medicine?q=@q&page=@(page + 1)&pageSize=@ViewBag.PageSize">Next</a>
+            </div>
+        </div>
     }
-    </tbody>
-</table>
+</div>

@@ -1,0 +1,63 @@
+@model DispenseViewModel
+@{
+    ViewData["Title"] = "Dispense Prescription";
+    var rx = ViewBag.Prescription as Prescription;
+    var available = ViewBag.Available as Dictionary<int, decimal> ?? new Dictionary<int, decimal>();
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-0">Dispense @rx?.PrescriptionNumber</h1>
+        <p class="text-muted mb-0">@(rx?.Patient?.ApplicationUser?.FullName ?? "—") · stock is deducted earliest-expiry first.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/Prescription/Details/@Model.PrescriptionId"><i class="bi bi-arrow-left me-1"></i>Back</a>
+</div>
+<form asp-action="Dispense" asp-route-id="@Model.PrescriptionId" method="post" data-spinner>
+    @Html.AntiForgeryToken()
+    <div class="card">
+        <div class="card-header">Items</div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Medicine</th><th>Requested</th><th>Available</th><th style="width:170px">Dispense qty</th></tr></thead>
+                <tbody>
+                @for (var i = 0; i < Model.Items.Count; i++)
+                {
+                    var line = Model.Items[i];
+                    var item = rx?.Items?.FirstOrDefault(x => x.PrescriptionItemId == line.PrescriptionItemId);
+                    var stock = available.ContainsKey(line.MedicineId) ? available[line.MedicineId] : 0m;
+                    <tr>
+                        <td class="fw-semibold">@(item?.Medicine?.MedicineName ?? "—")</td>
+                        <td>@line.RequestedQuantity</td>
+                        <td>
+                            @if (stock <= 0)
+                            {
+                                <span class="badge-status badge-out">Out of stock</span>
+                            }
+                            else if (stock < line.RequestedQuantity)
+                            {
+                                <span class="badge-status badge-low">@stock available</span>
+                            }
+                            else
+                            {
+                                <span class="badge-status badge-ok">@stock available</span>
+                            }
+                        </td>
+                        <td>
+                            <input type="hidden" name="Items[@i].PrescriptionItemId" value="@line.PrescriptionItemId" />
+                            <input type="hidden" name="Items[@i].MedicineId" value="@line.MedicineId" />
+                            <input type="hidden" name="Items[@i].RequestedQuantity" value="@line.RequestedQuantity" />
+                            <input type="number" name="Items[@i].QuantityToDispense" value="@line.QuantityToDispense" min="0" max="@line.RequestedQuantity" step="0.01" class="form-control form-control-sm" />
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-body border-top">
+            <label class="form-label" for="Notes">Dispensing notes</label>
+            <textarea class="form-control mb-3" id="Notes" name="Notes" rows="2" placeholder="Optional notes"></textarea>
+            <button type="submit" class="btn btn-success" data-confirm="Dispense these items and deduct stock?">
+                <i class="bi bi-box-seam me-1"></i>Confirm dispensing
+            </button>
+        </div>
+    </div>
+</form>

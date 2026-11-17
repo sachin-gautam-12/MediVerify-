@@ -1,0 +1,98 @@
+@model Prescription
+@{
+    ViewData["Title"] = "Verify " + Model.PrescriptionNumber;
+    var alerts = ViewBag.SafetyAlerts as List<SafetyAlert> ?? new List<SafetyAlert>();
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <h1 class="h3 mb-0">Verify @Model.PrescriptionNumber</h1>
+            <partial name="_StatusBadge" model="Model.Status" />
+        </div>
+        <p class="text-muted mb-0">@(Model.Patient?.ApplicationUser?.FullName ?? "—") · prescribed by @(Model.Doctor?.FullName ?? "—")</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/Prescription/Queue"><i class="bi bi-arrow-left me-1"></i>Queue</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card mb-3">
+            <div class="card-header">Medicines to verify</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Medicine</th><th>Qty</th><th>Days</th><th>Instructions</th></tr></thead>
+                    <tbody>
+                    @foreach (var item in Model.Items ?? new List<PrescriptionItem>())
+                    {
+                        <tr>
+                            <td class="fw-semibold">@(item.Medicine?.MedicineName ?? "—")</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.Duration</td>
+                            <td>@item.PrescribedInstructions</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header text-danger"><i class="bi bi-shield-exclamation me-1"></i>Safety checks (@alerts.Count)</div>
+            <div class="list-group list-group-flush">
+                @if (!alerts.Any())
+                {
+                    <div class="list-group-item text-success"><i class="bi bi-check-circle me-1"></i>No open safety alerts.</div>
+                }
+                @foreach (var alert in alerts)
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>@alert.AlertType</strong>
+                            <span class="badge-status @(alert.Severity == "High" ? "badge-out" : alert.Severity == "Moderate" ? "badge-low" : "badge-ok")">@alert.Severity</span>
+                        </div>
+                        <div class="small text-muted">@alert.Description</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Decision</div>
+            <div class="card-body">
+                <form asp-action="Verify" asp-route-id="@Model.PrescriptionId" method="post" data-spinner id="verifyForm">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="approve" id="approve" value="true" checked />
+                            <label class="form-check-label" for="approve"><strong>Approve</strong> — ready to dispense</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="approve" id="reject" value="false" />
+                            <label class="form-check-label" for="reject"><strong>Reject</strong> — send back to doctor</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="reason">Rejection reason</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Required when rejecting"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit decision</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script>
+    (function () {
+        const reason = document.getElementById('reason');
+        function sync() {
+            const reject = document.getElementById('reject').checked;
+            reason.required = reject;
+            reason.disabled = !reject;
+        }
+        document.querySelectorAll('[name=approve]').forEach(function (r) { r.addEventListener('change', sync); });
+        sync();
+    })();
+</script>
+}

@@ -1,0 +1,47 @@
+@model InventoryViewModel
+@{
+    ViewData["Title"] = "Add Stock";
+    var medicines = ViewBag.Medicines as List<Medicine> ?? new List<Medicine>();
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div><h1 class="h3 mb-1">Add stock</h1><p class="text-muted mb-0">Create a new inventory batch.</p></div>
+    <a class="btn btn-outline-secondary" href="/Inventory">Back</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <form asp-action="AddStock" method="post" data-spinner>
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="MedicineId" class="form-label">Medicine</label>
+                    <select asp-for="MedicineId" class="form-select">
+                        <option value="">Select medicine…</option>
+                        @foreach (var m in medicines)
+                        {
+                            <option value="@m.MedicineId">@m.MedicineName</option>
+                        }
+                    </select>
+                    <span asp-validation-for="MedicineId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BatchNumber" class="form-label">Batch number</label>
+                    <input asp-for="BatchNumber" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="AvailableQuantity" class="form-label">Quantity</label>
+                    <input asp-for="AvailableQuantity" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ReorderLevel" class="form-label">Reorder level</label>
+                    <input asp-for="ReorderLevel" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ExpiryDate" class="form-label">Expiry date</label>
+                    <input asp-for="ExpiryDate" type="date" class="form-control" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-plus-lg me-1"></i>Add stock</button>
+        </form>
+    </div>
+</div>

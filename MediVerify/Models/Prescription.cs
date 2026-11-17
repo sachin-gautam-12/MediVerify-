@@ -28,6 +28,11 @@ namespace MediVerify.Models
         public DateTime? UpdatedAt { get; set; }
         public bool IsVerified { get; set; } = false;
 
+        public string RejectionReason { get; set; }
+        public string VerifiedBy { get; set; }
+        public DateTime? VerifiedAt { get; set; }
+        public DateTime? DispensedAt { get; set; }
+
         public ICollection<PrescriptionItem> Items { get; set; }
     }
 }

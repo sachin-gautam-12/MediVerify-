@@ -21,6 +21,7 @@ namespace MediVerify.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<DispensingRecord> DispensingRecords { get; set; }
         public DbSet<DispensedItem> DispensedItems { get; set; }
+        public DbSet<DrugInteraction> DrugInteractions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -84,6 +85,19 @@ namespace MediVerify.Data
 
             // Notification link for deep-linking from the bell
             builder.Entity<Notification>().Property(n => n.Link).HasMaxLength(500);
+
+            // Drug interaction pair
+            builder.Entity<DrugInteraction>()
+                .HasOne(d => d.MedicineA)
+                .WithMany()
+                .HasForeignKey(d => d.MedicineAId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<DrugInteraction>()
+                .HasOne(d => d.MedicineB)
+                .WithMany()
+                .HasForeignKey(d => d.MedicineBId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

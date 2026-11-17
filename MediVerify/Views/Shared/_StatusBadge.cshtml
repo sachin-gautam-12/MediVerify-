@@ -1,0 +1,15 @@
+@model string
+@{
+    var status = string.IsNullOrWhiteSpace(Model) ? "Unknown" : Model;
+    var css = status.ToLowerInvariant() switch
+    {
+        "draft" => "badge-draft",
+        "submitted" => "badge-submitted",
+        "verified" => "badge-verified",
+        "dispensed" => "badge-dispensed",
+        "rejected" => "badge-rejected",
+        "cancelled" => "badge-cancelled",
+        _ => "badge-draft"
+    };
+}
+<span class="badge-status @css">@status</span>

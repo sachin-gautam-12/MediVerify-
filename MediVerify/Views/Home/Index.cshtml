@@ -1,11 +1,119 @@
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Safer prescriptions";
+    var isAuth = User.Identity?.IsAuthenticated == true;
 }
-<div class="text-center">
-    <h1 class="display-4">MediVerify</h1>
-    <p class="lead">Prescription verification and pharmacy workflow management.</p>
-    <p>
-        <a class="btn btn-primary" href="/Account/Login">Login</a>
-        <a class="btn btn-outline-primary" href="/Account/Register">Register</a>
-    </p>
-</div>
+<section class="landing-hero">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="landing-pill"><i class="bi bi-shield-check me-1"></i>Built for safer pharmacy workflows</span>
+                <h1 class="landing-title mt-3">Prescriptions, <span>verified</span> at every step.</h1>
+                <p class="landing-lead">
+                    MediVerify connects doctors, pharmacists, administrators and patients in one audited
+                    workflow — from digital prescription to verified dispensing, with automated safety checks.
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    @if (isAuth)
+                    {
+                        <a class="btn btn-primary btn-lg" href="/Dashboard">Go to my dashboard <i class="bi bi-arrow-right ms-1"></i></a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary btn-lg" href="/Account/Login">Sign in <i class="bi bi-arrow-right ms-1"></i></a>
+                        <a class="btn btn-outline-primary btn-lg" href="/Account/Register">Create patient account</a>
+                    }
+                </div>
+                <div class="d-flex flex-wrap gap-4 mt-4 small text-muted">
+                    <span><i class="bi bi-check2-circle text-success me-1"></i>Drug interaction checks</span>
+                    <span><i class="bi bi-check2-circle text-success me-1"></i>Stock &amp; expiry aware</span>
+                    <span><i class="bi bi-check2-circle text-success me-1"></i>Full audit trail</span>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="landing-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="~/img/logo.svg" width="34" height="34" alt="" />
+                            <strong>Prescription preview</strong>
+                        </div>
+                        <span class="badge-status badge-verified">Verified</span>
+                    </div>
+                    <div class="landing-rx-row"><span>Amoxicillin 500 mg</span><span>21 caps</span></div>
+                    <div class="landing-rx-row"><span>Paracetamol 650 mg</span><span>15 tabs</span></div>
+                    <div class="landing-rx-row"><span>Pantoprazole 40 mg</span><span>14 tabs</span></div>
+                    <div class="landing-check mt-3">
+                        <i class="bi bi-shield-exclamation text-warning"></i>
+                        <div>
+                            <strong class="small d-block">1 safety warning</strong>
+                            <span class="small text-muted">Potential interaction reviewed by pharmacist</span>
+                        </div>
+                    </div>
+                    <div class="landing-steps mt-4">
+                        <span class="done">Draft</span><span class="done">Submitted</span><span class="done">Verified</span><span>Dispensed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="h3 mb-1">One workflow, four roles</h2>
+        <p class="text-muted mb-0">Everyone sees exactly what they need, and nothing more.</p>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="landing-icon" style="background:rgba(13,148,136,.12);color:#0d9488"><i class="bi bi-heart-pulse"></i></div>
+                <h3 class="h6 mt-3">Doctors</h3>
+                <p class="text-muted small mb-0">Write multi-medicine prescriptions, submit for review and track every patient.</p>
+            </div></div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="landing-icon" style="background:rgba(37,99,235,.12);color:#2563eb"><i class="bi bi-capsule"></i></div>
+                <h3 class="h6 mt-3">Pharmacists</h3>
+                <p class="text-muted small mb-0">Verify against automated safety checks, dispense in one transaction and print receipts.</p>
+            </div></div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="landing-icon" style="background:rgba(217,119,6,.12);color:#d97706"><i class="bi bi-shield-lock"></i></div>
+                <h3 class="h6 mt-3">Administrators</h3>
+                <p class="text-muted small mb-0">Manage medicines, inventory, users, audit logs and export reports.</p>
+            </div></div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100"><div class="card-body">
+                <div class="landing-icon" style="background:rgba(16,185,129,.12);color:#059669"><i class="bi bi-person"></i></div>
+                <h3 class="h6 mt-3">Patients</h3>
+                <p class="text-muted small mb-0">Follow your prescriptions from review to collection and keep your profile current.</p>
+            </div></div>
+        </div>
+    </div>
+</section>
+
+<section class="landing-band">
+    <div class="container py-5">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-5">
+                <h2 class="h3 mb-2">From prescription to collection in four steps</h2>
+                <p class="mb-0 text-muted">Every step is timestamped, authorised and written to the audit log, so the whole chain stays accountable.</p>
+            </div>
+            <div class="col-lg-7">
+                <div class="row g-3">
+                    <div class="col-6"><div class="landing-step"><span>1</span><div><strong>Prescribe</strong><div class="small text-muted">Doctor builds a digital prescription.</div></div></div></div>
+                    <div class="col-6"><div class="landing-step"><span>2</span><div><strong>Verify</strong><div class="small text-muted">Pharmacist reviews alerts and approves.</div></div></div></div>
+                    <div class="col-6"><div class="landing-step"><span>3</span><div><strong>Dispense</strong><div class="small text-muted">Stock deducted earliest-expiry first.</div></div></div></div>
+                    <div class="col-6"><div class="landing-step"><span>4</span><div><strong>Collect</strong><div class="small text-muted">Patient receives a printable receipt.</div></div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="container py-4 d-flex flex-wrap justify-content-between gap-2 small text-muted">
+    <span>© @DateTime.Now.Year MediVerify. Demo application.</span>
+    <span><a href="/Account/Login">Sign in</a> · <a href="/Account/Register">Register</a></span>
+</footer>

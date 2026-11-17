@@ -1,0 +1,74 @@
+@model IEnumerable<AuditLog>
+@{
+    ViewData["Title"] = "Audit Log";
+    var list = Model?.ToList() ?? new List<AuditLog>();
+    var actions = ViewBag.Actions as List<string> ?? new List<string>();
+    var entities = ViewBag.Entities as List<string> ?? new List<string>();
+    var q = ViewBag.Query as string ?? "";
+    var action = ViewBag.Action as string ?? "";
+    var entity = ViewBag.Entity as string ?? "";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Audit log</h1>
+        <p class="text-muted mb-0">@list.Count most recent event(s).</p>
+    </div>
+    <a class="btn btn-outline-primary" href="/Audit/ExportCsv?q=@q&action=@action&entity=@entity&from=@ViewBag.From&to=@ViewBag.To"><i class="bi bi-download me-1"></i>Export CSV</a>
+</div>
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <input class="form-control form-control-sm" name="q" value="@q" placeholder="User, details…" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Action</label>
+                <select class="form-select form-select-sm" name="action">
+                    <option value="">All</option>
+                    @foreach (var a in actions) { <option value="@a" selected="@(a == action)">@a</option> }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Entity</label>
+                <select class="form-select form-select-sm" name="entity">
+                    <option value="">All</option>
+                    @foreach (var e in entities) { <option value="@e" selected="@(e == entity)">@e</option> }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">From</label>
+                <input class="form-control form-control-sm" type="date" name="from" value="@ViewBag.From" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">To</label>
+                <input class="form-control form-control-sm" type="date" name="to" value="@ViewBag.To" />
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-sm btn-primary w-100" type="submit"><i class="bi bi-funnel"></i></button>
+            </div>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sortable mb-0" data-page-size="15">
+            <thead><tr><th data-sort>Time</th><th data-sort>User</th><th data-sort>Action</th><th data-sort>Entity</th><th>IP</th><th>Details</th></tr></thead>
+            <tbody>
+            @if (!list.Any())
+            {
+                <tr><td colspan="6"><div class="empty-state"><i class="bi bi-journal-text"></i>No audit events match the filters.</div></td></tr>
+            }
+            @foreach (var log in list)
+            {
+                <tr>
+                    <td class="text-muted text-nowrap">@log.Timestamp.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</td>
+                    <td>@(log.User?.Email ?? log.UserId)</td>
+                    <td><span class="badge-status badge-submitted">@log.Action</span></td>
+                    <td>@log.EntityName @(log.EntityId.HasValue ? "#" + log.EntityId : "")</td>
+                    <td class="text-muted">@log.IPAddress</td>
+                    <td class="text-muted">@log.Details</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

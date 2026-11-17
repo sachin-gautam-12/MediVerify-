@@ -192,6 +192,39 @@ namespace MediVerify.Migrations
                     b.ToTable("DispensingRecords");
                 });
 
+            modelBuilder.Entity("MediVerify.Models.DrugInteraction", b =>
+                {
+                    b.Property<int>("DrugInteractionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DrugInteractionId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("MedicineAId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicineBId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("DrugInteractionId");
+
+                    b.HasIndex("MedicineAId");
+
+                    b.HasIndex("MedicineBId");
+
+                    b.ToTable("DrugInteractions");
+                });
+
             modelBuilder.Entity("MediVerify.Models.Inventory", b =>
                 {
                     b.Property<int>("InventoryId")
@@ -357,6 +390,9 @@ namespace MediVerify.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DispensedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DoctorId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -378,6 +414,10 @@ namespace MediVerify.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RejectionReason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -387,6 +427,13 @@ namespace MediVerify.Migrations
 
                     b.Property<DateTime?>("ValidUntil")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VerifiedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("PrescriptionId");
 
@@ -664,6 +711,25 @@ namespace MediVerify.Migrations
                     b.Navigation("Pharmacist");
 
                     b.Navigation("Prescription");
+                });
+
+            modelBuilder.Entity("MediVerify.Models.DrugInteraction", b =>
+                {
+                    b.HasOne("MediVerify.Models.Medicine", "MedicineA")
+                        .WithMany()
+                        .HasForeignKey("MedicineAId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MediVerify.Models.Medicine", "MedicineB")
+                        .WithMany()
+                        .HasForeignKey("MedicineBId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MedicineA");
+
+                    b.Navigation("MedicineB");
                 });
 
             modelBuilder.Entity("MediVerify.Models.Inventory", b =>

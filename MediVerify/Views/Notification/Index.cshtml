@@ -1,0 +1,47 @@
+@model IEnumerable<Notification>
+@{
+    ViewData["Title"] = "Notifications";
+    var list = Model?.ToList() ?? new List<Notification>();
+    var unread = list.Count(n => !n.IsRead);
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Notifications</h1>
+        <p class="text-muted mb-0">@unread unread of @list.Count.</p>
+    </div>
+    @if (unread > 0)
+    {
+        <form asp-action="MarkAllRead" method="post">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-check2-all me-1"></i>Mark all read</button>
+        </form>
+    }
+</div>
+<div class="card">
+    <div class="list-group list-group-flush">
+        @if (!list.Any())
+        {
+            <div class="empty-state"><i class="bi bi-bell-slash"></i>No notifications yet.</div>
+        }
+        @foreach (var n in list)
+        {
+            <div class="list-group-item d-flex gap-3 align-items-start @(n.IsRead ? "" : "bg-light")">
+                <div class="mv-avatar" style="width:36px;height:36px;flex:0 0 36px"><i class="bi @(n.IsRead ? "bi-bell" : "bi-bell-fill")"></i></div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between gap-2">
+                        <strong>@n.Title</strong>
+                        <small class="text-muted">@n.CreatedAt.ToLocalTime().ToString("dd MMM, HH:mm")</small>
+                    </div>
+                    <div class="text-muted">@n.Message</div>
+                </div>
+                <form asp-action="MarkRead" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@n.NotificationId" />
+                    <button class="btn btn-sm @(n.IsRead ? "btn-outline-secondary" : "btn-primary")" type="submit">
+                        @(n.IsRead ? "Open" : "Mark read")
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>

@@ -2,12 +2,147 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
-<h2>Admin Dashboard</h2>
-<ul class="list-group">
-    <li class="list-group-item">Total Users: @Model.TotalUsers</li>
-    <li class="list-group-item">Total Patients: @Model.TotalPatients</li>
-    <li class="list-group-item">Total Prescriptions: @Model.TotalPrescriptions</li>
-    <li class="list-group-item">Pending Reviews: @Model.PendingReviews</li>
-    <li class="list-group-item">Active Medicines: @Model.ActiveMedicines</li>
-    <li class="list-group-item">Low Stock: @Model.LowStockCount</li>
-</ul>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Good day, Administrator</h1>
+        <p class="text-muted mb-0">Here is what is happening across MediVerify.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="/Reports"><i class="bi bi-bar-chart me-1"></i>Reports</a>
+        <a class="btn btn-primary" href="/UserAdmin/Create"><i class="bi bi-person-plus me-1"></i>New user</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-xl-3">
+        <div class="card kpi-card p-3">
+            <div class="kpi-label">Total prescriptions</div>
+            <div class="kpi-value">@Model.TotalPrescriptions</div>
+            <i class="bi bi-file-medical kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card kpi-card gradient-2 p-3">
+            <div class="kpi-label">Pending reviews</div>
+            <div class="kpi-value">@Model.PendingReviews</div>
+            <i class="bi bi-hourglass-split kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card kpi-card gradient-4 p-3">
+            <div class="kpi-label">Patients</div>
+            <div class="kpi-value">@Model.TotalPatients</div>
+            <i class="bi bi-people kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="card kpi-card gradient-3 p-3">
+            <div class="kpi-label">Low stock batches</div>
+            <div class="kpi-value">@Model.LowStockCount</div>
+            <i class="bi bi-box-seam kpi-icon"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Prescriptions per day</span>
+                <span class="text-muted small">Last 14 days</span>
+            </div>
+            <div class="card-body"><canvas id="rxPerDay" height="110"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">Status breakdown</div>
+            <div class="card-body"><canvas id="statusChart" height="180"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header">Top medicines</div>
+            <div class="card-body"><canvas id="topMeds" height="180"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Low stock</span>
+                <a class="small" href="/Inventory?status=low">View inventory</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Medicine</th><th>Batch</th><th>Available</th><th>Reorder</th></tr></thead>
+                    <tbody>
+                    @if (!Model.LowStockItems.Any())
+                    {
+                        <tr><td colspan="4"><div class="empty-state py-4"><i class="bi bi-check-circle"></i>All stock levels are healthy.</div></td></tr>
+                    }
+                    @foreach (var item in Model.LowStockItems)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@(item.Medicine?.MedicineName ?? "—")</td>
+                            <td>@(item.BatchNumber ?? "—")</td>
+                            <td><span class="badge-status @(item.AvailableQuantity <= 0 ? "badge-out" : "badge-low")">@item.AvailableQuantity</span></td>
+                            <td>@item.ReorderLevel</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent activity</span>
+        <a class="small" href="/Audit">View audit log</a>
+    </div>
+    <div class="list-group list-group-flush">
+        @if (!Model.RecentActivity.Any())
+        {
+            <div class="empty-state py-4"><i class="bi bi-journal-text"></i>No activity yet.</div>
+        }
+        @foreach (var log in Model.RecentActivity)
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge-status badge-submitted me-2">@log.Action</span>
+                    <span>@log.EntityName @(log.EntityId.HasValue ? "#" + log.EntityId : "")</span>
+                    <span class="text-muted small ms-2">@(log.User?.FullName ?? log.UserId)</span>
+                </div>
+                <small class="text-muted">@log.Timestamp.ToLocalTime().ToString("dd MMM, HH:mm")</small>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const chartColors = ['#0d9488', '#2563eb', '#f59e0b', '#ef4444', '#10b981'];
+    new Chart(document.getElementById('rxPerDay'), {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(JsonSerializer.Serialize(Model.PrescriptionsPerDay.Labels)),
+            datasets: [{ label: 'Prescriptions', data: @Html.Raw(JsonSerializer.Serialize(Model.PrescriptionsPerDay.Values)), borderColor: '#0d9488', backgroundColor: 'rgba(13,148,136,.12)', fill: true, tension: .35 }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: { labels: @Html.Raw(JsonSerializer.Serialize(Model.StatusBreakdown.Labels)), datasets: [{ data: @Html.Raw(JsonSerializer.Serialize(Model.StatusBreakdown.Values)), backgroundColor: chartColors }] },
+        options: { plugins: { legend: { position: 'bottom' } }, cutout: '62%' }
+    });
+    new Chart(document.getElementById('topMeds'), {
+        type: 'bar',
+        data: { labels: @Html.Raw(JsonSerializer.Serialize(Model.TopMedicines.Labels)), datasets: [{ label: 'Prescribed', data: @Html.Raw(JsonSerializer.Serialize(Model.TopMedicines.Values)), backgroundColor: '#2563eb', borderRadius: 6 }] },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+</script>
+}

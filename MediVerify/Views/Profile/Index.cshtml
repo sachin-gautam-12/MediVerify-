@@ -1,0 +1,49 @@
+@model PatientProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div><h1 class="h3 mb-1">My profile</h1><p class="text-muted mb-0">Keep your contact details current.</p></div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Index" method="post" data-spinner>
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DateOfBirth" class="form-label"></label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Gender" class="form-label"></label>
+                    <select asp-for="Gender" class="form-select">
+                        <option>Female</option><option>Male</option><option>Other</option><option>Unspecified</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="EmergencyContact" class="form-label"></label>
+                    <input asp-for="EmergencyContact" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <label asp-for="Address" class="form-label"></label>
+                    <input asp-for="Address" class="form-control" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-save me-1"></i>Save profile</button>
+        </form>
+    </div>
+</div>

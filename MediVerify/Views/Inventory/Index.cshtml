@@ -1,0 +1,75 @@
+@model IEnumerable<Inventory>
+@{
+    ViewData["Title"] = "Inventory";
+    var list = Model?.ToList() ?? new List<Inventory>();
+    var today = DateTime.UtcNow.Date;
+    var status = ViewBag.Status as string ?? "";
+    var q = ViewBag.Query as string ?? "";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Inventory</h1>
+        <p class="text-muted mb-0">Batches, expiry and stock levels. Dispensing uses earliest expiry first.</p>
+    </div>
+    <a class="btn btn-primary" href="/Inventory/AddStock"><i class="bi bi-plus-lg me-1"></i>Add stock</a>
+</div>
+<div class="card">
+    <div class="card-header d-flex flex-wrap gap-2 align-items-center">
+        <form method="get" class="d-flex gap-2">
+            <input class="form-control form-control-sm" style="width:240px" name="q" value="@q" placeholder="Search medicine or batch…" />
+            <select class="form-select form-select-sm" name="status" style="width:150px">
+                <option value="" selected="@(string.IsNullOrEmpty(status))">All stock</option>
+                <option value="low" selected="@(status == "low")">Low stock</option>
+                <option value="out" selected="@(status == "out")">Out of stock</option>
+                <option value="expired" selected="@(status == "expired")">Expired</option>
+            </select>
+            <button class="btn btn-sm btn-outline-primary" type="submit"><i class="bi bi-funnel"></i></button>
+        </form>
+        <span class="ms-auto text-muted small">@list.Count batch(es)</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sortable mb-0" data-page-size="12">
+            <thead><tr><th data-sort>Medicine</th><th data-sort>Batch</th><th data-sort>Expiry</th><th data-sort>Available</th><th data-sort>Reorder</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @if (!list.Any())
+            {
+                <tr><td colspan="7"><div class="empty-state"><i class="bi bi-box-seam"></i>No inventory rows found.</div></td></tr>
+            }
+            @foreach (var i in list)
+            {
+                var expired = i.ExpiryDate.HasValue && i.ExpiryDate.Value.Date < today;
+                var outOfStock = i.AvailableQuantity <= 0;
+                var low = !outOfStock && i.AvailableQuantity < i.ReorderLevel;
+                <tr>
+                    <td class="fw-semibold">@(i.Medicine?.MedicineName ?? "—")</td>
+                    <td>@(string.IsNullOrWhiteSpace(i.BatchNumber) ? "—" : i.BatchNumber)</td>
+                    <td>@(i.ExpiryDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                    <td>@i.AvailableQuantity</td>
+                    <td>@i.ReorderLevel</td>
+                    <td>
+                        @if (expired)
+                        {
+                            <span class="badge-status badge-expired">Expired</span>
+                        }
+                        else if (outOfStock)
+                        {
+                            <span class="badge-status badge-out">Out of stock</span>
+                        }
+                        else if (low)
+                        {
+                            <span class="badge-status badge-low">Low stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge-status badge-ok">In stock</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" href="/Inventory/Adjust/@i.InventoryId"><i class="bi bi-sliders"></i> Adjust</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

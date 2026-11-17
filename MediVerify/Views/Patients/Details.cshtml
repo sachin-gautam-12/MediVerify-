@@ -1,0 +1,43 @@
+@model Patient
+@{
+    ViewData["Title"] = "Patient Details";
+    var prescriptions = ViewBag.Prescriptions as List<Prescription> ?? new List<Prescription>();
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div><h1 class="h3 mb-1">@(Model.ApplicationUser?.FullName ?? "Patient")</h1><p class="text-muted mb-0">@Model.Gender · DOB @Model.DateOfBirth.ToString("dd MMM yyyy")</p></div>
+    <a class="btn btn-outline-secondary" href="/Patients">Back</a>
+</div>
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Contact</div>
+            <div class="card-body small">
+                <div class="mb-2"><div class="text-muted">Email</div><div>@Model.ApplicationUser?.Email</div></div>
+                <div class="mb-2"><div class="text-muted">Phone</div><div>@Model.ApplicationUser?.PhoneNumber</div></div>
+                <div class="mb-2"><div class="text-muted">Address</div><div>@Model.Address</div></div>
+                <div><div class="text-muted">Emergency contact</div><div>@Model.EmergencyContact</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Prescriptions written by you</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Number</th><th>Status</th><th>Created</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var rx in prescriptions)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@rx.PrescriptionNumber</td>
+                            <td><partial name="_StatusBadge" model="rx.Status" /></td>
+                            <td class="text-muted">@rx.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</td>
+                            <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/Prescription/Details/@rx.PrescriptionId">View</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

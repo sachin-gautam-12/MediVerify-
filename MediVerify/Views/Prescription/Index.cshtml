@@ -1,22 +1,74 @@
 @model IEnumerable<Prescription>
 @{
     ViewData["Title"] = "Prescriptions";
+    var isDoctor = User.IsInRole("Doctor");
+    var isPharmacist = User.IsInRole("Pharmacist");
+    var list = Model?.ToList() ?? new List<Prescription>();
 }
-<h2>Prescriptions</h2>
-<p><a class="btn btn-primary" href="/Prescription/Create">Create New</a></p>
-<table class="table table-striped">
-    <thead><tr><th>Number</th><th>Status</th><th>Created</th><th></th></tr></thead>
-    <tbody>
-    @foreach (var rx in Model)
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Prescriptions</h1>
+        <p class="text-muted mb-0">@(isDoctor ? "Your prescriptions and their current status." : isPharmacist ? "All non-draft prescriptions." : "Your prescription history.")</p>
+    </div>
+    @if (isDoctor)
     {
-        <tr>
-            <td>@rx.PrescriptionNumber</td>
-            <td>@rx.Status</td>
-            <td>@rx.CreatedAt</td>
-            <td>
-                <a href="/Prescription/Details/@rx.PrescriptionId">Details</a>
-            </td>
-        </tr>
+        <a class="btn btn-primary" href="/Prescription/Create"><i class="bi bi-plus-lg me-1"></i>New prescription</a>
     }
-    </tbody>
-</table>
+</div>
+<div class="card">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="d-flex gap-2">
+            <input class="form-control form-control-sm" style="width:260px" placeholder="Search this table…" data-table-search="#rxTable" />
+        </div>
+        <span class="text-muted small">@list.Count record(s)</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sortable mb-0" id="rxTable" data-page-size="10">
+            <thead>
+                <tr>
+                    <th data-sort>Number</th>
+                    <th data-sort>Patient</th>
+                    <th data-sort>Doctor</th>
+                    <th data-sort>Status</th>
+                    <th data-sort>Created</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (!list.Any())
+            {
+                <tr><td colspan="6"><div class="empty-state"><i class="bi bi-file-medical"></i>No prescriptions yet.</div></td></tr>
+            }
+            @foreach (var rx in list)
+            {
+                <tr>
+                    <td class="fw-semibold">@rx.PrescriptionNumber</td>
+                    <td>@(rx.Patient?.ApplicationUser?.FullName ?? "—")</td>
+                    <td>@(rx.Doctor?.FullName ?? "—")</td>
+                    <td><partial name="_StatusBadge" model="rx.Status" /></td>
+                    <td class="text-muted">@rx.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" href="/Prescription/Details/@rx.PrescriptionId"><i class="bi bi-eye"></i></a>
+                        @if (isDoctor && rx.Status == "Draft")
+                        {
+                            <a class="btn btn-sm btn-outline-primary" href="/Prescription/Edit/@rx.PrescriptionId"><i class="bi bi-pencil"></i></a>
+                        }
+                        @if (isPharmacist && rx.Status == "Submitted")
+                        {
+                            <a class="btn btn-sm btn-primary" href="/Prescription/Verify/@rx.PrescriptionId">Verify</a>
+                        }
+                        @if (isPharmacist && rx.Status == "Verified")
+                        {
+                            <a class="btn btn-sm btn-success" href="/Prescription/Dispense/@rx.PrescriptionId">Dispense</a>
+                        }
+                        @if (rx.Status == "Dispensed")
+                        {
+                            <a class="btn btn-sm btn-outline-success" href="/Prescription/Receipt/@rx.PrescriptionId">Receipt</a>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

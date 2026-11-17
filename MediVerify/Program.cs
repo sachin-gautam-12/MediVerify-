@@ -32,6 +32,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<ISafetyService, SafetyService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));

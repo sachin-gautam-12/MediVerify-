@@ -1,0 +1,77 @@
+@model IEnumerable<SafetyAlert>
+@{
+    ViewData["Title"] = "Safety Alerts";
+    var list = Model?.ToList() ?? new List<SafetyAlert>();
+    var status = ViewBag.Status as string ?? "";
+    var severity = ViewBag.Severity as string ?? "";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Safety alerts</h1>
+        <p class="text-muted mb-0">Automated checks for interactions, stock, expiry and dosing.</p>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="d-flex flex-wrap gap-2">
+            <select class="form-select form-select-sm" name="status" style="width:170px">
+                <option value="">All statuses</option>
+                <option value="Pending" selected="@(status == "Pending")">Pending</option>
+                <option value="Acknowledged" selected="@(status == "Acknowledged")">Acknowledged</option>
+                <option value="Resolved" selected="@(status == "Resolved")">Resolved</option>
+            </select>
+            <select class="form-select form-select-sm" name="severity" style="width:150px">
+                <option value="">All severities</option>
+                <option value="High" selected="@(severity == "High")">High</option>
+                <option value="Moderate" selected="@(severity == "Moderate")">Moderate</option>
+                <option value="Low" selected="@(severity == "Low")">Low</option>
+            </select>
+            <button class="btn btn-sm btn-outline-primary" type="submit"><i class="bi bi-funnel"></i>Filter</button>
+            <span class="ms-auto text-muted small align-self-center">@list.Count alert(s)</span>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sortable mb-0" data-page-size="10">
+            <thead><tr><th data-sort>Created</th><th data-sort>Type</th><th data-sort>Medicine</th><th data-sort>Severity</th><th data-sort>Status</th><th>Description</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @if (!list.Any())
+            {
+                <tr><td colspan="7"><div class="empty-state"><i class="bi bi-shield-check"></i>No safety alerts.</div></td></tr>
+            }
+            @foreach (var a in list)
+            {
+                <tr>
+                    <td class="text-muted text-nowrap">@a.CreatedAt.ToLocalTime().ToString("dd MMM, HH:mm")</td>
+                    <td class="fw-semibold">@a.AlertType</td>
+                    <td>@(a.Medicine?.MedicineName ?? "—")</td>
+                    <td><span class="badge-status @(a.Severity == "High" ? "badge-out" : a.Severity == "Moderate" ? "badge-low" : "badge-ok")">@a.Severity</span></td>
+                    <td><span class="badge-status @(a.ReviewStatus == "Pending" ? "badge-low" : a.ReviewStatus == "Resolved" ? "badge-ok" : "badge-submitted")">@a.ReviewStatus</span></td>
+                    <td class="text-muted">@a.Description</td>
+                    <td class="text-end text-nowrap">
+                        @if (a.PrescriptionId.HasValue)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" href="/Prescription/Details/@a.PrescriptionId"><i class="bi bi-eye"></i></a>
+                        }
+                        @if (a.ReviewStatus == "Pending")
+                        {
+                            <form asp-action="Acknowledge" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@a.SafetyAlertId" />
+                                <button class="btn btn-sm btn-outline-primary" type="submit">Acknowledge</button>
+                            </form>
+                        }
+                        @if (a.ReviewStatus != "Resolved")
+                        {
+                            <form asp-action="Resolve" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@a.SafetyAlertId" />
+                                <button class="btn btn-sm btn-success" type="submit">Resolve</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

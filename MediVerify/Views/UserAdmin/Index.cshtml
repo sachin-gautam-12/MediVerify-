@@ -1,0 +1,78 @@
+@model IEnumerable<UserRowViewModel>
+@{
+    ViewData["Title"] = "Users";
+    var list = Model?.ToList() ?? new List<UserRowViewModel>();
+    var q = ViewBag.Query as string ?? "";
+    var roles = new[] { "Administrator", "Doctor", "Pharmacist", "Patient" };
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">User management</h1>
+        <p class="text-muted mb-0">@list.Count user(s). Create accounts, change roles and reset passwords.</p>
+    </div>
+    <a class="btn btn-primary" href="/UserAdmin/Create"><i class="bi bi-person-plus me-1"></i>Create user</a>
+</div>
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="d-flex gap-2">
+            <input class="form-control form-control-sm" style="max-width:320px" name="q" value="@q" placeholder="Search email or name…" />
+            <button class="btn btn-sm btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+            @if (!string.IsNullOrWhiteSpace(q)) { <a class="btn btn-sm btn-outline-secondary" href="/UserAdmin">Clear</a> }
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sortable mb-0" data-page-size="10">
+            <thead><tr><th data-sort>Name</th><th data-sort>Email</th><th data-sort>Role</th><th data-sort>Status</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @if (!list.Any())
+            {
+                <tr><td colspan="5"><div class="empty-state"><i class="bi bi-people"></i>No users found.</div></td></tr>
+            }
+            @foreach (var row in list)
+            {
+                <tr>
+                    <td class="fw-semibold">@row.User.FullName</td>
+                    <td>@row.User.Email</td>
+                    <td>
+                        <form asp-action="ChangeRole" method="post" class="d-flex gap-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@row.User.Id" />
+                            <select name="role" class="form-select form-select-sm" style="width:150px">
+                                @foreach (var r in roles)
+                                {
+                                    <option value="@r" selected="@(r == row.Role)">@r</option>
+                                }
+                            </select>
+                            <button class="btn btn-sm btn-outline-primary" type="submit" title="Change role"><i class="bi bi-check"></i></button>
+                        </form>
+                    </td>
+                    <td>
+                        @if (row.User.IsActive)
+                        {
+                            <span class="badge-status badge-ok">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge-status badge-cancelled">Inactive</span>
+                        }
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <form asp-action="ResetPassword" method="post" class="d-inline" data-confirm="Generate a temporary password for @row.User.Email?">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@row.User.Id" />
+                            <button class="btn btn-sm btn-outline-secondary" type="submit" title="Reset password"><i class="bi bi-key"></i></button>
+                        </form>
+                        <form asp-action="ToggleActive" method="post" class="d-inline" data-confirm="Toggle access for @row.User.Email?">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@row.User.Id" />
+                            <button class="btn btn-sm @(row.User.IsActive ? "btn-outline-danger" : "btn-outline-success")" type="submit" title="Toggle active">
+                                <i class="bi @(row.User.IsActive ? "bi-person-x" : "bi-person-check")"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,38 @@
+@model IEnumerable<Patient>
+@{
+    ViewData["Title"] = "My Patients";
+    var list = Model?.ToList() ?? new List<Patient>();
+    var counts = ViewBag.PrescriptionCounts as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">My patients</h1>
+        <p class="text-muted mb-0">Patients linked to prescriptions you have written.</p>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <input class="form-control form-control-sm" style="max-width:300px" placeholder="Search patients…" data-table-search="#patientsTable" />
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sortable mb-0" id="patientsTable" data-page-size="10">
+            <thead><tr><th data-sort>Name</th><th data-sort>Gender</th><th data-sort>Date of birth</th><th data-sort>Prescriptions</th><th class="text-end">Action</th></tr></thead>
+            <tbody>
+            @if (!list.Any())
+            {
+                <tr><td colspan="5"><div class="empty-state"><i class="bi bi-people"></i>No patients yet. Create a prescription to link a patient.</div></td></tr>
+            }
+            @foreach (var p in list)
+            {
+                <tr>
+                    <td class="fw-semibold">@(p.ApplicationUser?.FullName ?? "—")</td>
+                    <td>@p.Gender</td>
+                    <td>@p.DateOfBirth.ToString("dd MMM yyyy")</td>
+                    <td>@(counts.ContainsKey(p.PatientId) ? counts[p.PatientId] : 0)</td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/Patients/Details/@p.PatientId">View</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
