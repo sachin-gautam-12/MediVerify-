@@ -18,6 +18,9 @@ namespace MediVerify.Models
         [Required]
         public string Message { get; set; }
 
+        [StringLength(500)]
+        public string Link { get; set; }
+
         public bool IsRead { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

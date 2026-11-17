@@ -153,6 +153,7 @@ namespace MediVerify.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("DispensedItemId");
@@ -200,6 +201,7 @@ namespace MediVerify.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryId"));
 
                     b.Property<decimal>("AvailableQuantity")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("BatchNumber")
@@ -216,6 +218,7 @@ namespace MediVerify.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("ReorderLevel")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("InventoryId");
@@ -277,6 +280,11 @@ namespace MediVerify.Migrations
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -415,6 +423,7 @@ namespace MediVerify.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("PrescriptionItemId");

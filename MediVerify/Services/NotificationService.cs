@@ -2,16 +2,22 @@ using System;
 using System.Threading.Tasks;
 using MediVerify.Data;
 using MediVerify.Models;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace MediVerify.Services
 {
     public class NotificationService : INotificationService
     {
         private readonly ApplicationDbContext _context;
-        public NotificationService(ApplicationDbContext context) => _context = context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public async Task CreateAsync(string userId, string title, string message)
+        public NotificationService(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            _context = context;
+            _userManager = userManager;
+        }
+
+        public async Task CreateAsync(string userId, string title, string message, string link = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(userId);
             ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -22,10 +28,33 @@ namespace MediVerify.Services
                 UserId = userId,
                 Title = title,
                 Message = message,
+                Link = link,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             };
             _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task NotifyRoleAsync(string roleName, string title, string message, string link = null)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(roleName);
+
+            var users = await _userManager.GetUsersInRoleAsync(roleName);
+            if (users.Count == 0) return;
+
+            foreach (var user in users)
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    UserId = user.Id,
+                    Title = title,
+                    Message = message,
+                    Link = link,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
             await _context.SaveChangesAsync();
         }
 

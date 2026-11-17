@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 48 48" role="img" aria-label="MediVerify logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="url(#g)"/>
+  <path d="M24 11v26M11 24h26" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="36" cy="12" r="5" fill="#fff"/>
+</svg>

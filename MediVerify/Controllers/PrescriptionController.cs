@@ -77,7 +77,7 @@ namespace MediVerify.Controllers
             _context.Prescriptions.Add(prescription);
             await _context.SaveChangesAsync();
             await _audit.LogAsync(doctorId, "CreatePrescription", "Prescription", prescription.PrescriptionId);
-            await _notification.CreateAsync("Pharmacist", "New Prescription", $"Prescription {prescription.PrescriptionNumber} submitted for review.");
+            await _notification.NotifyRoleAsync("Pharmacist", "New Prescription", $"Prescription {prescription.PrescriptionNumber} submitted for review.", $"/Prescription/Details/{prescription.PrescriptionId}");
             return RedirectToAction(nameof(Index));
         }
 
@@ -103,7 +103,7 @@ namespace MediVerify.Controllers
             prescription.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             await _audit.LogAsync(prescription.DoctorId, "SubmitPrescription", "Prescription", id);
-            await _notification.CreateAsync("Pharmacist", "Prescription Submitted", $"Prescription {prescription.PrescriptionNumber} awaiting verification.");
+            await _notification.NotifyRoleAsync("Pharmacist", "Prescription Submitted", $"Prescription {prescription.PrescriptionNumber} awaiting verification.", $"/Prescription/Details/{prescription.PrescriptionId}");
             return RedirectToAction(nameof(Index));
         }
     }

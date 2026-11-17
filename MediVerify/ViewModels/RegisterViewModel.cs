@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace MediVerify.ViewModels
@@ -18,6 +19,22 @@ namespace MediVerify.ViewModels
         public string PhoneNumber { get; set; }
 
         [Required]
+        [DataType(DataType.Date)]
+        [Display(Name = "Date of Birth")]
+        public DateTime DateOfBirth { get; set; } = DateTime.Today.AddYears(-30);
+
+        [Required]
+        [Display(Name = "Gender")]
+        public string Gender { get; set; } = "Unspecified";
+
+        [StringLength(300)]
+        public string Address { get; set; }
+
+        [StringLength(100)]
+        [Display(Name = "Emergency Contact")]
+        public string EmergencyContact { get; set; }
+
+        [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
@@ -26,9 +43,5 @@ namespace MediVerify.ViewModels
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; }
-
-        [Required]
-        [Display(Name = "Role")]
-        public string Role { get; set; } // Administrator, Doctor, Pharmacist, Patient
     }
 }

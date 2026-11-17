@@ -1,22 +1,71 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign in";
+    Layout = "_AuthLayout";
 }
-<h2>Login</h2>
-<form asp-action="Login" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" />
-    </div>
-    <div class="mb-3 form-check">
-        <input asp-for="RememberMe" class="form-check-input" />
-        <label asp-for="RememberMe" class="form-check-label"></label>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-</form>
+<div class="auth-page">
+    <section class="auth-hero">
+        <div class="d-flex align-items-center gap-2">
+            <img src="~/img/logo.svg" width="38" height="38" alt="" />
+            <span class="fs-5 fw-bold text-white">MediVerify</span>
+        </div>
+        <div class="position-relative">
+            <div class="hero-title mb-3">Safer prescriptions,<br />verified at every step.</div>
+            <p class="mb-0" style="max-width:420px;opacity:.85">A complete prescription verification and pharmacy workflow platform for doctors, pharmacists, administrators and patients.</p>
+        </div>
+        <div class="d-flex gap-4 small" style="opacity:.75">
+            <span><i class="bi bi-shield-check me-1"></i>Audited</span>
+            <span><i class="bi bi-capsule me-1"></i>Inventory aware</span>
+            <span><i class="bi bi-activity me-1"></i>Safety checks</span>
+        </div>
+    </section>
+    <section class="auth-form-wrap">
+        <div class="auth-form-card">
+            <h1 class="h3 mb-1">Welcome back</h1>
+            <p class="text-muted mb-4">Sign in to continue to MediVerify.</p>
+            <form asp-action="Login" method="post" data-spinner>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input asp-for="Email" class="form-control" autocomplete="username" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">Sign in</button>
+            </form>
+            <div class="text-center text-muted my-3" style="font-size:.78rem">QUICK DEMO LOGINS</div>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <button type="button" class="demo-chip" data-email="admin@mediverify.com" data-password="Admin#123"><i class="bi bi-shield-lock"></i> Admin</button>
+                <button type="button" class="demo-chip" data-email="doctor@mediverify.com" data-password="Doctor#123"><i class="bi bi-heart-pulse"></i> Doctor</button>
+                <button type="button" class="demo-chip" data-email="pharma@mediverify.com" data-password="Pharma#123"><i class="bi bi-capsule"></i> Pharmacist</button>
+                <button type="button" class="demo-chip" data-email="patient@mediverify.com" data-password="Patient#123"><i class="bi bi-person"></i> Patient</button>
+            </div>
+            <p class="text-center text-muted mt-4 mb-0">New patient? <a href="/Account/Register">Create an account</a></p>
+        </div>
+    </section>
+</div>
+@section Scripts {
+<script>
+    document.querySelectorAll('.demo-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            document.getElementById('Email').value = chip.dataset.email;
+            document.getElementById('Password').value = chip.dataset.password;
+            document.getElementById('Password').focus();
+        });
+    });
+</script>
+}

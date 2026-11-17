@@ -75,6 +75,15 @@ namespace MediVerify.Data
                 .WithMany()
                 .HasForeignKey(di => di.MedicineId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Decimal precision (prevents silent truncation warnings)
+            builder.Entity<Inventory>().Property(i => i.AvailableQuantity).HasPrecision(18, 2);
+            builder.Entity<Inventory>().Property(i => i.ReorderLevel).HasPrecision(18, 2);
+            builder.Entity<PrescriptionItem>().Property(i => i.Quantity).HasPrecision(18, 2);
+            builder.Entity<DispensedItem>().Property(i => i.Quantity).HasPrecision(18, 2);
+
+            // Notification link for deep-linking from the bell
+            builder.Entity<Notification>().Property(n => n.Link).HasMaxLength(500);
         }
     }
 }

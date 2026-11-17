@@ -45,42 +45,32 @@ namespace MediVerify.Controllers
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
+            {
+                // Self-registration is always a Patient account.
+                const string role = "Patient";
+                if (!await _roleManager.RoleExistsAsync(role))
                 {
-                    // Assign role – only allow Patient role for self‑registration
-                    string role = model.Role;
-                    if (!new[] { "Administrator", "Doctor", "Pharmacist" }.Contains(role))
-                    {
-                        role = "Patient"; // force patient if any privileged role selected
-                    }
-                    if (!await _roleManager.RoleExistsAsync(role))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole(role));
-                    }
-                    await _userManager.AddToRoleAsync(user, role);
-
-                    // If role is Patient, also create Patient entity
-                    if (role == "Patient")
-                    {
-                        var patient = new Patient
-                        {
-                            ApplicationUserId = user.Id,
-                            DateOfBirth = System.DateTime.Now.AddYears(-30), // placeholder
-                            Gender = "Unspecified",
-                            Address = "",
-                            EmergencyContact = ""
-                        };
-                        // Using a scoped DbContext via DI is preferred; for brevity we use a new context here
-                        // This will be refined later if needed
-                        var scopeFactory = HttpContext.RequestServices.GetService(typeof(Microsoft.Extensions.DependencyInjection.IServiceScopeFactory)) as Microsoft.Extensions.DependencyInjection.IServiceScopeFactory;
-                        using var scope = scopeFactory.CreateScope();
-                        var db = scope.ServiceProvider.GetRequiredService<MediVerify.Data.ApplicationDbContext>();
-                        db.Patients.Add(patient);
-                        await db.SaveChangesAsync();
-                    }
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Dashboard");
+                    await _roleManager.CreateAsync(new IdentityRole(role));
                 }
+                await _userManager.AddToRoleAsync(user, role);
+
+                var patient = new Patient
+                {
+                    ApplicationUserId = user.Id,
+                    DateOfBirth = model.DateOfBirth,
+                    Gender = model.Gender,
+                    Address = model.Address,
+                    EmergencyContact = model.EmergencyContact
+                };
+                var scopeFactory = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.DependencyInjection.IServiceScopeFactory>();
+                using var scope = scopeFactory.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<MediVerify.Data.ApplicationDbContext>();
+                db.Patients.Add(patient);
+                await db.SaveChangesAsync();
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("Index", "Dashboard");
+            }
             foreach (var error in result.Errors)
                 ModelState.AddModelError(string.Empty, error.Description);
             return View(model);
@@ -124,6 +114,33 @@ namespace MediVerify.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["Success"] = "Your password has been changed.";
+                return RedirectToAction("Index", "Dashboard");
+            }
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+            return View(model);
         }
     }
 }
