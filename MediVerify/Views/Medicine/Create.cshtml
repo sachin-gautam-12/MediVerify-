@@ -1,0 +1,33 @@
+@model Medicine
+@{
+    ViewData["Title"] = "Create Medicine";
+}
+<h2>Create Medicine</h2>
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label asp-for="MedicineName" class="form-label"></label>
+        <input asp-for="MedicineName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="GenericName" class="form-label"></label>
+        <input asp-for="GenericName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Manufacturer" class="form-label"></label>
+        <input asp-for="Manufacturer" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Category" class="form-label"></label>
+        <input asp-for="Category" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+    <div class="mb-3 form-check">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>

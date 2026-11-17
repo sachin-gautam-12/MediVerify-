@@ -1,0 +1,24 @@
+@model Prescription
+@{
+    ViewData["Title"] = "Prescription Details";
+}
+<h2>Prescription @Model.PrescriptionNumber</h2>
+<p>Status: @Model.Status</p>
+<p>Patient: @(Model.Patient?.ApplicationUser?.FullName ?? "Unknown")</p>
+<p>Doctor: @(Model.Doctor?.FullName ?? "Unknown")</p>
+<p>Notes: @Model.Notes</p>
+<h4>Items</h4>
+<ul>
+@foreach (var item in Model.Items ?? new List<PrescriptionItem>())
+{
+    <li>@(item.Medicine?.MedicineName ?? "Unknown") - Qty: @item.Quantity - @item.PrescribedInstructions</li>
+}
+</ul>
+@if (Model.Status == "Draft")
+{
+    <form asp-action="Submit" asp-route-id="@Model.PrescriptionId" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+}
+<p><a href="/Prescription">Back</a></p>

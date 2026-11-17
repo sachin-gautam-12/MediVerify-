@@ -1,0 +1,13 @@
+@model PharmacistDashboardViewModel
+@{
+    ViewData["Title"] = "Pharmacist Dashboard";
+}
+<h2>Pharmacist Dashboard</h2>
+<h4>Pending Prescriptions</h4>
+<ul>
+@foreach (var rx in Model.PendingPrescriptions ?? new List<Prescription>()) { <li>@rx.PrescriptionNumber - @rx.Status</li> }
+</ul>
+<h4>Low Stock Medicines</h4>
+<ul>
+@foreach (var m in Model.LowStockMedicines ?? new List<Medicine>()) { <li>@m.MedicineName</li> }
+</ul>

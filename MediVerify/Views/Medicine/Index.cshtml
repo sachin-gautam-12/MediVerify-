@@ -1,0 +1,24 @@
+@model IEnumerable<Medicine>
+@{
+    ViewData["Title"] = "Medicines";
+}
+<h2>Medicines</h2>
+<p><a class="btn btn-primary" href="/Medicine/Create">Create New</a></p>
+<table class="table table-striped">
+    <thead><tr><th>Name</th><th>Generic</th><th>Manufacturer</th><th>Active</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var m in Model)
+    {
+        <tr>
+            <td>@m.MedicineName</td>
+            <td>@m.GenericName</td>
+            <td>@m.Manufacturer</td>
+            <td>@m.IsActive</td>
+            <td>
+                <a href="/Medicine/Details/@m.MedicineId">Details</a> |
+                <a href="/Medicine/Edit/@m.MedicineId">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

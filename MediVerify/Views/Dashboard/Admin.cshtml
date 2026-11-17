@@ -1,0 +1,13 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+<h2>Admin Dashboard</h2>
+<ul class="list-group">
+    <li class="list-group-item">Total Users: @Model.TotalUsers</li>
+    <li class="list-group-item">Total Patients: @Model.TotalPatients</li>
+    <li class="list-group-item">Total Prescriptions: @Model.TotalPrescriptions</li>
+    <li class="list-group-item">Pending Reviews: @Model.PendingReviews</li>
+    <li class="list-group-item">Active Medicines: @Model.ActiveMedicines</li>
+    <li class="list-group-item">Low Stock: @Model.LowStockCount</li>
+</ul>
