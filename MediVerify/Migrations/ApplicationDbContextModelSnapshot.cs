@@ -135,7 +135,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AuditLogs");
+                    b.ToTable("AuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.DispensedItem", b =>
@@ -162,7 +162,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("MedicineId");
 
-                    b.ToTable("DispensedItems");
+                    b.ToTable("DispensedItems", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.DispensingRecord", b =>
@@ -189,7 +189,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("PrescriptionId");
 
-                    b.ToTable("DispensingRecords");
+                    b.ToTable("DispensingRecords", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.DrugInteraction", b =>
@@ -222,7 +222,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("MedicineBId");
 
-                    b.ToTable("DrugInteractions");
+                    b.ToTable("DrugInteractions", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.Inventory", b =>
@@ -258,7 +258,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("MedicineId");
 
-                    b.ToTable("Inventories");
+                    b.ToTable("Inventories", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.Medicine", b =>
@@ -297,7 +297,7 @@ namespace MediVerify.Migrations
 
                     b.HasKey("MedicineId");
 
-                    b.ToTable("Medicines");
+                    b.ToTable("Medicines", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.Notification", b =>
@@ -335,7 +335,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.Patient", b =>
@@ -372,7 +372,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.Prescription", b =>
@@ -441,7 +441,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Prescriptions");
+                    b.ToTable("Prescriptions", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.PrescriptionItem", b =>
@@ -479,7 +479,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("PrescriptionId");
 
-                    b.ToTable("PrescriptionItems");
+                    b.ToTable("PrescriptionItems", (string)null);
                 });
 
             modelBuilder.Entity("MediVerify.Models.SafetyAlert", b =>
@@ -528,7 +528,7 @@ namespace MediVerify.Migrations
 
                     b.HasIndex("PrescriptionId");
 
-                    b.ToTable("SafetyAlerts");
+                    b.ToTable("SafetyAlerts", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

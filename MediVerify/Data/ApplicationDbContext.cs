@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MediVerify.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MediVerify.Data
 {
@@ -22,6 +24,40 @@ namespace MediVerify.Data
         public DbSet<DispensingRecord> DispensingRecords { get; set; }
         public DbSet<DispensedItem> DispensedItems { get; set; }
         public DbSet<DrugInteraction> DrugInteractions { get; set; }
+
+        /// <summary>
+        /// Several legacy columns are NOT NULL even though the C# properties are
+        /// nullable reference types. Normalise null strings to empty strings so a
+        /// missing optional value never breaks an insert/update.
+        /// </summary>
+        private void NormalizeRequiredStrings()
+        {
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.State != EntityState.Added && entry.State != EntityState.Modified) continue;
+                foreach (var property in entry.Properties)
+                {
+                    if (property.Metadata.ClrType == typeof(string)
+                        && !property.Metadata.IsNullable
+                        && property.CurrentValue == null)
+                    {
+                        property.CurrentValue = string.Empty;
+                    }
+                }
+            }
+        }
+
+        public override int SaveChanges()
+        {
+            NormalizeRequiredStrings();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            NormalizeRequiredStrings();
+            return base.SaveChangesAsync(cancellationToken);
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

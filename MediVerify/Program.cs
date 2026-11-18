@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sql => sql.CommandTimeout(180)));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddTransient<DbInitializer>();
@@ -24,7 +25,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddControllersWithViews()
+builder.Services.AddControllersWithViews(options =>
+    {
+        // Optional string fields (notes, generic name, etc.) must not be treated as
+        // implicitly required just because they are non-nullable reference types.
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    })
     .AddRazorRuntimeCompilation();
 builder.Services.AddRazorPages();
 
