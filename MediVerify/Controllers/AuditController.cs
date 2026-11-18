@@ -16,12 +16,20 @@ namespace MediVerify.Controllers
 
         public AuditController(ApplicationDbContext context) => _context = context;
 
-        public async Task<IActionResult> Index(string q, string action, string entity, DateTime? from, DateTime? to)
+        // NOTE: the filter parameters must not be called "action" or "controller" —
+        // those names collide with MVC route values and the binder would inject the
+        // current action name ("Index"), filtering out every row.
+        public async Task<IActionResult> Index(
+            string q,
+            [FromQuery(Name = "action")] string actionFilter,
+            [FromQuery(Name = "entity")] string entityFilter,
+            DateTime? from,
+            DateTime? to)
         {
-            var logs = await Filter(q, action, entity, from, to).Take(500).ToListAsync();
+            var logs = await Filter(q, actionFilter, entityFilter, from, to).Take(500).ToListAsync();
             ViewBag.Query = q;
-            ViewBag.Action = action;
-            ViewBag.Entity = entity;
+            ViewBag.Action = actionFilter;
+            ViewBag.Entity = entityFilter;
             ViewBag.From = from?.ToString("yyyy-MM-dd");
             ViewBag.To = to?.ToString("yyyy-MM-dd");
             ViewBag.Actions = await _context.AuditLogs.Select(a => a.Action).Distinct().OrderBy(a => a).ToListAsync();
@@ -29,9 +37,14 @@ namespace MediVerify.Controllers
             return View(logs);
         }
 
-        public async Task<IActionResult> ExportCsv(string q, string action, string entity, DateTime? from, DateTime? to)
+        public async Task<IActionResult> ExportCsv(
+            string q,
+            [FromQuery(Name = "action")] string actionFilter,
+            [FromQuery(Name = "entity")] string entityFilter,
+            DateTime? from,
+            DateTime? to)
         {
-            var logs = await Filter(q, action, entity, from, to).ToListAsync();
+            var logs = await Filter(q, actionFilter, entityFilter, from, to).ToListAsync();
             var sb = new StringBuilder();
             sb.AppendLine("Timestamp,User,Action,Entity,EntityId,IPAddress,Details");
             foreach (var log in logs)
