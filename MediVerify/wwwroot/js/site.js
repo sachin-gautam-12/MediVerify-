@@ -88,8 +88,29 @@
     // ---------- Confirm delete ----------
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
         form.addEventListener('submit', function (e) {
+            if (form.dataset.confirmed === '1') return;
+            e.preventDefault();
             const msg = form.getAttribute('data-confirm') || 'Are you sure?';
-            if (!window.confirm(msg)) e.preventDefault();
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Please confirm',
+                    text: msg,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, continue',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#0d9488',
+                    cancelButtonColor: '#64748b',
+                    reverseButtons: true
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        form.dataset.confirmed = '1';
+                        form.submit();
+                    }
+                });
+            } else if (!window.confirm(msg)) {
+                e.preventDefault();
+            }
         });
     });
 
